@@ -1,6 +1,6 @@
 {
   "name": "@hunter-lab/bottom-sheet",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A beautifully simple, lightweight, and customizable Bottom Sheet for React Native.",
   "repository": "https://github.com/dqtkien/bottom-sheet",
   "author": "Hunter Lab",
@@ -16,7 +16,7 @@
     "typescript"
   ],
   "main": "lib/commonjs/index.js",
-  "react-native": "src/index.tsx",
+  "react-native": "lib/module/index.js",
   "module": "lib/module/index.js",
   "types": "lib/typescript/index.d.ts",
   "exports": {
@@ -28,7 +28,6 @@
   },
   "source": "src/index.tsx",
   "files": [
-    "src",
     "lib",
     "!**/__tests__",
     "!**/__fixtures__",
