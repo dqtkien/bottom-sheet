@@ -1,8 +1,18 @@
 # @hunter-lab/bottom-sheet
 
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/dqtkien/bottom-sheet)
+[![License: MIT](https://img.shields.io/badge/license-MIT-success.svg)](https://opensource.org/licenses/MIT)
+![Types: included](https://img.shields.io/badge/types-included-blue.svg)
+![Runs with Expo](https://img.shields.io/badge/Runs_with_Expo-4630EB.svg?style=flat&logo=EXPO&labelColor=f3f3f3&logoColor=000)
+
 A beautifully simple, lightweight, and customizable Bottom Sheet Modal for React Native.
 
-**Zero dependencies.** No `react-native-reanimated`, no `react-native-gesture-handler`, no bloated third-party libraries. Built purely with React Native's native `Animated` and `PanResponder` APIs. If you are tired of dealing with complex worklets, massive dependency trees, and native module linking issues just to get a bottom sheet, this package is for you!
+If you are tired of dealing with massive dependency trees, complex worklets, and native module linking issues just to get a bottom sheet, this package is for you!
+
+**Why use this?**
+
+- 📦 **Zero Dependencies:** No `react-native-reanimated`, no `react-native-gesture-handler`, and absolutely no bloated third-party libraries.
+- ⚛️ **Pure React Native:** Built purely with the native `Animated` and `PanResponder` APIs.
 
 ## Features
 

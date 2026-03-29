@@ -1,7 +1,9 @@
 {
   "name": "@hunter-lab/bottom-sheet",
-  "version": "0.0.2",
-  "description": "Custom Bottom Sheet Modal for React Native",
+  "version": "0.0.3",
+  "description": "A beautifully simple, lightweight, and customizable Bottom Sheet for React Native.",
+  "repository": "https://github.com/dqtkien/bottom-sheet",
+  "author": "Hunter Lab",
   "license": "MIT",
   "keywords": [
     "hunter-lab",
