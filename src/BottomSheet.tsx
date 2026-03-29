@@ -1,17 +1,17 @@
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   Modal,
   View,
   StyleSheet,
   Pressable,
   TouchableWithoutFeedback,
-  Dimensions,
   Animated,
   PanResponder,
   StyleProp,
   ViewStyle,
   GestureResponderEvent,
   PanResponderGestureState,
+  useWindowDimensions,
 } from "react-native";
 
 export type BottomSheetProps = {
@@ -26,20 +26,21 @@ export type BottomSheetProps = {
   handleStyle?: StyleProp<ViewStyle>;
   backdropStyle?: StyleProp<ViewStyle>;
   closeButtonStyle?: StyleProp<ViewStyle>;
+  contentStyle?: StyleProp<ViewStyle>;
   hideCloseButton?: boolean;
 };
 
-// Fallback close icon built using basic View primitives
-const FallbackCloseIcon = () => (
+// Pre-computed rotation styles to avoid re-creation
+const ROTATE_45: ViewStyle = { transform: [{ rotate: "45deg" }] };
+const ROTATE_NEG_45: ViewStyle = { transform: [{ rotate: "-45deg" }] };
+
+// Fallback close icon built using basic View primitives (memoized)
+const FallbackCloseIcon = React.memo(() => (
   <View style={styles.closeIconWrapper}>
-    <View
-      style={[styles.closeIconStroke, { transform: [{ rotate: "45deg" }] }]}
-    />
-    <View
-      style={[styles.closeIconStroke, { transform: [{ rotate: "-45deg" }] }]}
-    />
+    <View style={[styles.closeIconStroke, ROTATE_45]} />
+    <View style={[styles.closeIconStroke, ROTATE_NEG_45]} />
   </View>
-);
+));
 
 const BottomSheet = ({
   visible,
@@ -51,9 +52,10 @@ const BottomSheet = ({
   handleStyle,
   backdropStyle,
   closeButtonStyle,
+  contentStyle,
   hideCloseButton = false,
 }: BottomSheetProps) => {
-  const windowHeight = Dimensions.get("window").height;
+  const { height: windowHeight } = useWindowDimensions();
   const heightPercentage = parseFloat(snapPoints[0]) || 33;
   const contentHeight = (windowHeight * heightPercentage) / 100;
 
@@ -61,12 +63,26 @@ const BottomSheet = ({
   const translateY = useRef(new Animated.Value(contentHeight)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
+  const latestRef = useRef({ contentHeight, onClose });
+  useEffect(() => {
+    latestRef.current = { contentHeight, onClose };
+  }, [contentHeight, onClose]);
+
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onStartShouldSetPanResponderCapture: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponderCapture: () => true,
+      onStartShouldSetPanResponder: () => false,
+      onStartShouldSetPanResponderCapture: () => false,
+      onMoveShouldSetPanResponder: (
+        _: GestureResponderEvent,
+        gestureState: PanResponderGestureState,
+      ) => {
+        // Only claim gesture if clearly swiping down
+        return (
+          gestureState.dy > 5 &&
+          Math.abs(gestureState.dy) > Math.abs(gestureState.dx)
+        );
+      },
+      onMoveShouldSetPanResponderCapture: () => false,
       onPanResponderMove: (
         _: GestureResponderEvent,
         gestureState: PanResponderGestureState,
@@ -79,12 +95,13 @@ const BottomSheet = ({
         _: GestureResponderEvent,
         gestureState: PanResponderGestureState,
       ) => {
-        if (gestureState.dy > contentHeight / 4 || gestureState.vy > 0.5) {
-          onClose();
+        const { contentHeight: h, onClose: close } = latestRef.current;
+        if (gestureState.dy > h / 4 || gestureState.vy > 0.5) {
+          close();
         } else {
           Animated.spring(translateY, {
             toValue: 0,
-            useNativeDriver: false,
+            useNativeDriver: true,
             bounciness: 0,
           }).start();
         }
@@ -99,7 +116,7 @@ const BottomSheet = ({
         Animated.timing(translateY, {
           toValue: 0,
           duration: 200,
-          useNativeDriver: false,
+          useNativeDriver: true,
         }),
         Animated.timing(opacity, {
           toValue: 1,
@@ -112,7 +129,7 @@ const BottomSheet = ({
         Animated.timing(translateY, {
           toValue: contentHeight,
           duration: 200,
-          useNativeDriver: false,
+          useNativeDriver: true,
         }),
         Animated.timing(opacity, {
           toValue: 0,
@@ -124,6 +141,15 @@ const BottomSheet = ({
       });
     }
   }, [visible, contentHeight, translateY, opacity]);
+
+  const animatedSheetStyle = useMemo(
+    () => [
+      styles.sheetContainer,
+      sheetStyle,
+      { height: contentHeight, transform: [{ translateY }] },
+    ],
+    [sheetStyle, contentHeight, translateY],
+  );
 
   return (
     <Modal
@@ -138,13 +164,7 @@ const BottomSheet = ({
             <View style={[styles.backdrop, backdropStyle]} />
           </TouchableWithoutFeedback>
         </Animated.View>
-        <Animated.View
-          style={[
-            styles.sheetContainer,
-            sheetStyle,
-            { height: contentHeight, transform: [{ translateY }] },
-          ]}
-        >
+        <Animated.View style={animatedSheetStyle}>
           <View style={styles.handleContainer} {...panResponder.panHandlers}>
             <View style={[styles.handle, handleStyle]} />
           </View>
@@ -156,7 +176,7 @@ const BottomSheet = ({
               {closeIcon ? closeIcon : <FallbackCloseIcon />}
             </Pressable>
           )}
-          <View style={styles.content}>{children}</View>
+          <View style={[styles.content, contentStyle]}>{children}</View>
         </Animated.View>
       </View>
     </Modal>
@@ -226,7 +246,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingBottom: 24,
+    paddingBottom: 16,
   },
 });
 
