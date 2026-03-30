@@ -57,6 +57,8 @@ export type BottomSheetProps = {
   closeIcon?: ReactNode;
   sheetStyle?: StyleProp<ViewStyle>;
   handleStyle?: StyleProp<ViewStyle>;
+  handleIndicatorStyle?: StyleProp<ViewStyle>;
+  handleContainerStyle?: StyleProp<ViewStyle>;
   backdropStyle?: StyleProp<ViewStyle>;
   closeButtonStyle?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;

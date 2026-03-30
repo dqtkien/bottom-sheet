@@ -24,7 +24,8 @@ export const BottomSheet = ({
   animateOnMount = true,
   closeIcon,
   sheetStyle,
-  handleStyle,
+  handleIndicatorStyle,
+  handleContainerStyle,
   backdropStyle,
   closeButtonStyle,
   contentStyle,
@@ -64,14 +65,20 @@ export const BottomSheet = ({
   return (
     <View style={styles.modalWrapper} pointerEvents="box-none">
       <View style={styles.overlay}>
-        <Animated.View style={[styles.backdropContainer, { opacity }]}>
+        <Animated.View
+          style={[styles.backdropContainer, { opacity }]}
+          {...panResponder.panHandlers}
+        >
           <TouchableWithoutFeedback onPress={onClose}>
             <View style={[styles.backdrop, backdropStyle]} />
           </TouchableWithoutFeedback>
         </Animated.View>
         <Animated.View style={animatedSheetStyle}>
-          <View style={styles.handleContainer} {...panResponder.panHandlers}>
-            <View style={[styles.handle, handleStyle]} />
+          <View
+            style={[styles.handleContainer, handleContainerStyle]}
+            {...panResponder.panHandlers}
+          >
+            <View style={[styles.handle, handleIndicatorStyle]} />
           </View>
           {!hideCloseButton && (
             <Pressable
@@ -109,7 +116,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
-    paddingTop: 8,
     shadowColor: "#2d2f44",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.25,
@@ -118,13 +124,13 @@ const styles = StyleSheet.create({
   },
   handleContainer: {
     alignItems: "center",
-    paddingVertical: 4,
-    marginBottom: 8,
+    paddingTop: 16,
+    paddingBottom: 24,
     backgroundColor: "transparent",
     width: "100%",
   },
   handle: {
-    width: 40,
+    width: 60,
     height: 5,
     borderRadius: 3,
     backgroundColor: "#e1e1e1",
