@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useBottomSheet } from "../../hooks/useBottomSheet";
 import { BottomSheetProps } from "../../types";
+import { resolveSnapPoints } from "../../utils/snapPoint";
 import { CloseIcon } from "../CloseIcon/CloseIcon";
 
 export const BottomSheet = ({
@@ -16,6 +17,10 @@ export const BottomSheet = ({
   onClose,
   children,
   snapPoints = ["33%"],
+  initialSnapIndex = 0,
+  onSnapChange,
+  enableSwipeUp = true,
+  enablePanDownToClose = true,
   animateOnMount = true,
   closeIcon,
   sheetStyle,
@@ -26,23 +31,32 @@ export const BottomSheet = ({
   hideCloseButton = false,
 }: BottomSheetProps) => {
   const { height: windowHeight } = useWindowDimensions();
-  const heightPercentage = parseFloat(snapPoints[0]) || 33;
-  const contentHeight = (windowHeight * heightPercentage) / 100;
 
-  const { showModal, translateY, opacity, panResponder } = useBottomSheet({
-    visible,
-    contentHeight,
-    onClose,
-    animateOnMount,
-  });
+  // Resolve snap points to sorted ascending pixel values
+  const snapHeights = useMemo(
+    () => resolveSnapPoints(snapPoints, windowHeight),
+    [snapPoints, windowHeight],
+  );
+
+  const { showModal, translateY, opacity, panResponder, maxSnapHeight } =
+    useBottomSheet({
+      visible,
+      snapHeights,
+      onClose,
+      animateOnMount,
+      initialSnapIndex,
+      onSnapChange,
+      enableSwipeUp,
+      enablePanDownToClose,
+    });
 
   const animatedSheetStyle = useMemo(
     () => [
       styles.sheetContainer,
       sheetStyle,
-      { height: contentHeight, transform: [{ translateY }] },
+      { height: maxSnapHeight, transform: [{ translateY }] },
     ],
-    [sheetStyle, contentHeight, translateY],
+    [sheetStyle, maxSnapHeight, translateY],
   );
 
   if (!showModal) return null;
