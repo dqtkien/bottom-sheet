@@ -1,6 +1,6 @@
 {
   "name": "@hunter-lab/bottom-sheet",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A beautifully simple, lightweight, and customizable Bottom Sheet for React Native.",
   "repository": "https://github.com/dqtkien/bottom-sheet",
   "author": "Hunter Lab",
@@ -35,7 +35,6 @@
   ],
   "scripts": {
     "build": "bob build",
-    "prepack": "npm run build",
     "release": "rm -rf lib && npm run build && npm publish --access public"
   },
   "peerDependencies": {

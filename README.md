@@ -89,6 +89,7 @@ const styles = StyleSheet.create({
 | `visible`          | `boolean`              | `required` | Controls the visibility of the modal.                                       |
 | `onClose`          | `() => void`           | `required` | Callback fired when the bottom sheet is closed via swipe or backdrop press. |
 | `snapPoints`       | `string[]`             | `['33%']`  | Array of height percentages (e.g. `['50%']`).                               |
+| `animateOnMount`   | `boolean`              | `true`     | If true, animates the bottom sheet in when first mounted with visible=true. |
 | `sheetStyle`       | `StyleProp<ViewStyle>` | `-`        | Style for the modal sheet container.                                        |
 | `contentStyle`     | `StyleProp<ViewStyle>` | `-`        | Style for the content area (inside the sheet).                              |
 | `backdropStyle`    | `StyleProp<ViewStyle>` | `-`        | Style for the darkened backdrop overlay.                                    |

@@ -1,17 +1,23 @@
-import React, { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
-  Modal,
-  View,
-  StyleSheet,
-  Pressable,
-  TouchableWithoutFeedback,
   Animated,
-  PanResponder,
-  StyleProp,
-  ViewStyle,
   GestureResponderEvent,
+  PanResponder,
   PanResponderGestureState,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  TouchableWithoutFeedback,
   useWindowDimensions,
+  View,
+  ViewStyle,
 } from "react-native";
 
 export type BottomSheetProps = {
@@ -19,6 +25,12 @@ export type BottomSheetProps = {
   onClose: () => void;
   children: ReactNode;
   snapPoints?: string[]; // E.g. ['33%']
+
+  /**
+   * If true (default), the bottom sheet animates in when first mounted with visible=true.
+   * If false, it simply appears instantly without animation.
+   */
+  animateOnMount?: boolean;
 
   // Customization Props
   closeIcon?: ReactNode;
@@ -47,6 +59,7 @@ const BottomSheet = ({
   onClose,
   children,
   snapPoints = ["33%"],
+  animateOnMount = true,
   closeIcon,
   sheetStyle,
   handleStyle,
@@ -59,14 +72,19 @@ const BottomSheet = ({
   const heightPercentage = parseFloat(snapPoints[0]) || 33;
   const contentHeight = (windowHeight * heightPercentage) / 100;
 
+  // Track whether this is the initial mount to handle "visible=true from the start"
+  const isInitialMount = useRef(true);
+
+  // If visible is true on initial mount and animateOnMount is false,
+  // start in the open position directly (no animation).
+  const initialTranslateY = visible && !animateOnMount ? 0 : contentHeight;
+  const initialOpacity = visible && !animateOnMount ? 1 : 0;
+
   const [showModal, setShowModal] = useState(visible);
-  const translateY = useRef(new Animated.Value(contentHeight)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(initialTranslateY)).current;
+  const opacity = useRef(new Animated.Value(initialOpacity)).current;
 
   const latestRef = useRef({ contentHeight, onClose });
-  useEffect(() => {
-    latestRef.current = { contentHeight, onClose };
-  }, [contentHeight, onClose]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -109,38 +127,47 @@ const BottomSheet = ({
     }),
   ).current;
 
-  useEffect(() => {
-    if (visible) {
+  /**
+   * Animate the sheet to the open position.
+   */
+  const animateOpen = useCallback(
+    (duration: number = 200) => {
       setShowModal(true);
       Animated.parallel([
         Animated.timing(translateY, {
           toValue: 0,
-          duration: 200,
+          duration,
           useNativeDriver: true,
         }),
         Animated.timing(opacity, {
           toValue: 1,
-          duration: 200,
+          duration,
           useNativeDriver: true,
         }),
       ]).start();
-    } else {
+    },
+    [translateY, opacity],
+  );
+
+  const animateClose = useCallback(
+    (duration: number = 200) => {
       Animated.parallel([
         Animated.timing(translateY, {
           toValue: contentHeight,
-          duration: 200,
+          duration,
           useNativeDriver: true,
         }),
         Animated.timing(opacity, {
           toValue: 0,
-          duration: 200,
+          duration,
           useNativeDriver: true,
         }),
       ]).start(() => {
         setShowModal(false);
       });
-    }
-  }, [visible, contentHeight, translateY, opacity]);
+    },
+    [translateY, opacity, contentHeight],
+  );
 
   const animatedSheetStyle = useMemo(
     () => [
@@ -151,13 +178,42 @@ const BottomSheet = ({
     [sheetStyle, contentHeight, translateY],
   );
 
+  useEffect(() => {
+    latestRef.current = { contentHeight, onClose };
+  }, [contentHeight, onClose]);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      if (visible && animateOnMount) {
+        requestAnimationFrame(() => animateOpen(250));
+      }
+      return;
+    }
+
+    // Subsequent visibility changes
+    if (visible) {
+      // Reset animated values to off-screen before opening
+      translateY.setValue(contentHeight);
+      opacity.setValue(0);
+      setShowModal(true);
+      requestAnimationFrame(() => animateOpen());
+    } else {
+      animateClose();
+    }
+  }, [visible]);
+
+  // Handle contentHeight changes while visible (e.g. orientation change)
+  useEffect(() => {
+    if (!isInitialMount.current && !visible) {
+      translateY.setValue(contentHeight);
+    }
+  }, [contentHeight]);
+
+  if (!showModal) return null;
+
   return (
-    <Modal
-      visible={showModal}
-      transparent={true}
-      animationType="none"
-      onRequestClose={onClose}
-    >
+    <View style={styles.modalWrapper} pointerEvents="box-none">
       <View style={styles.overlay}>
         <Animated.View style={[styles.backdropContainer, { opacity }]}>
           <TouchableWithoutFeedback onPress={onClose}>
@@ -179,11 +235,16 @@ const BottomSheet = ({
           <View style={[styles.content, contentStyle]}>{children}</View>
         </Animated.View>
       </View>
-    </Modal>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  modalWrapper: {
+    zIndex: 999999,
+    elevation: 999999,
+    ...StyleSheet.absoluteFillObject,
+  },
   overlay: {
     flex: 1,
     justifyContent: "flex-end",
