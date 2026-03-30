@@ -1,6 +1,6 @@
 {
   "name": "@hunter-lab/bottom-sheet",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A beautifully simple, lightweight, and customizable Bottom Sheet for React Native.",
   "repository": "https://github.com/dqtkien/bottom-sheet",
   "author": "Hunter Lab",

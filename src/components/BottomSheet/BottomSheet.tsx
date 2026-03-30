@@ -12,6 +12,12 @@ import { BottomSheetProps } from "../../types";
 import { resolveSnapPoints } from "../../utils/snapPoint";
 import { CloseIcon } from "../CloseIcon/CloseIcon";
 
+/**
+ * A highly configurable, performant React Native Bottom Sheet component.
+ * Supports multiple snap points, smooth animations, and gesture-based interactions.
+ *
+ * @param props - {@link BottomSheetProps}
+ */
 export const BottomSheet = ({
   visible,
   onClose,

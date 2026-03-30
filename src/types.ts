@@ -1,11 +1,30 @@
 import { ReactNode } from "react";
 import { StyleProp, ViewStyle } from "react-native";
 
+/**
+ * A snap point represents a height stop for the bottom sheet.
+ * Can be a percentage string (e.g. '50%') or a fixed pixel number.
+ */
 export type SnapPoint = string | number;
 
+/**
+ * Configuration options for the BottomSheet component.
+ */
 export type BottomSheetProps = {
+  /**
+   * Controlled visibility of the bottom sheet.
+   */
   visible: boolean;
+
+  /**
+   * Callback fired when the bottom sheet is closed (either by handle swipe,
+   * backdrop press, or close button).
+   */
   onClose: () => void;
+
+  /**
+   * The content to be rendered inside the bottom sheet.
+   */
   children: ReactNode;
 
   /**
@@ -50,17 +69,53 @@ export type BottomSheetProps = {
   /**
    * If true (default), the bottom sheet animates in when first mounted with visible=true.
    * If false, it simply appears instantly without animation.
+   * @default true
    */
   animateOnMount?: boolean;
 
-  // Customization Props
+  /**
+   * Optional custom close icon.
+   */
   closeIcon?: ReactNode;
+
+  /**
+   * Style applied to the main sheet container.
+   */
   sheetStyle?: StyleProp<ViewStyle>;
+
+  /**
+   * Style applied to the handle bar (the touchable area).
+   */
   handleStyle?: StyleProp<ViewStyle>;
+
+  /**
+   * Style applied to the handle indicator (the small horizontal bar).
+   */
   handleIndicatorStyle?: StyleProp<ViewStyle>;
+
+  /**
+   * Style applied to the container holding both handle and indicator.
+   */
   handleContainerStyle?: StyleProp<ViewStyle>;
+
+  /**
+   * Style applied to the semi-transparent background overlay.
+   */
   backdropStyle?: StyleProp<ViewStyle>;
+
+  /**
+   * Style applied to the close button container.
+   */
   closeButtonStyle?: StyleProp<ViewStyle>;
+
+  /**
+   * Style applied to the content container inside the sheet.
+   */
   contentStyle?: StyleProp<ViewStyle>;
+
+  /**
+   * If true, the close button in the top right corner will be hidden.
+   * @default false
+   */
   hideCloseButton?: boolean;
 };
